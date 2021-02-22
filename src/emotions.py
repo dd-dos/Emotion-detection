@@ -8,13 +8,16 @@ from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.callbacks import ModelCheckpoint
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # command line argument
 ap = argparse.ArgumentParser()
-ap.add_argument("--mode",help="train/display")
+ap.add_argument("--mode",help="train/display", require=True)
+ap.add_argument("--cp", help="checkpoint", require=True)
 mode = ap.parse_args().mode
+cp = ap.parse_args().cp
 
 # plots accuracy and loss curves
 def plot_model_history(model_history):
@@ -88,15 +91,17 @@ model.add(Dense(7, activation='softmax'))
 
 # If you want to train the same model or try other models, go for this
 if mode == "train":
+    cp_path = os.path.join(cp, 'best.h5')
+    checkpoint = ModelCheckpoint(cp_path, monitor='loss', verbose=1, save_best_only=True, mode='min', period=1)
     model.compile(loss='categorical_crossentropy',optimizer=Adam(lr=0.0001, decay=1e-6),metrics=['accuracy'])
     model_info = model.fit_generator(
             train_generator,
             steps_per_epoch=num_train // batch_size,
             epochs=num_epoch,
             validation_data=validation_generator,
-            validation_steps=num_val // batch_size)
+            validation_steps=num_val // batch_size,
+            callbacks=[checkpoint])
     plot_model_history(model_info)
-    model.save_weights('model.h5')
 
 # emotions will be displayed on your face from the webcam feed
 elif mode == "display":
