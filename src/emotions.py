@@ -14,8 +14,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # command line argument
 ap = argparse.ArgumentParser()
-ap.add_argument("--mode",help="train/display", require=True)
-ap.add_argument("--cp", help="checkpoint", require=True)
+ap.add_argument("--mode",help="train/display", required=True)
+ap.add_argument("--cp", help="checkpoint", required=True)
 mode = ap.parse_args().mode
 cp = ap.parse_args().cp
 

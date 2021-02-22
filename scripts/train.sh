@@ -1,2 +1,2 @@
-python ./emotion.py --mode train \
+python ./emotions.py --mode train \
                     --cp /content/drive/MyDrive/training/Emotion-detection
