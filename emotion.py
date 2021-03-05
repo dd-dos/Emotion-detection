@@ -89,7 +89,8 @@ def inference(args):
     writer = pd.ExcelWriter('result.xlsx', engine='xlsxwriter')
 
     imgs_path = os.path.join(args.root, "*")
-    os.makedirs("prediction", exist_ok=True)
+    os.remove("prediction")
+    os.makedirs("prediction")
     counter = 0
     for img_path in tqdm.tqdm(glob.glob(imgs_path)):
         img = cv2.imread(img_path)
@@ -114,7 +115,7 @@ def inference(args):
                 elif flag==6:
                     emotion=='neutral'
 
-                name = "./prediction/{}_{}.jpeg".format(flag,counter)
+                name = "./prediction/{}_{}.jpeg".format(emotion,counter)
                 cv2.imwrite(name, img)
 
 
