@@ -1,0 +1,14 @@
+sad1.jpg: happy
+fearful2.jpg: happy
+surprised2.jpg: happy
+happy1.jpg: happy
+disgusted2.jpeg: angry
+fearful1.jpg: sad
+happy2.jpg: happy
+neutral1.jpg: sad
+angry1.jpeg: fearful
+sad2.jpg: happy
+neutral2.jpg: sad
+angry2.jpeg: angry
+disgusted1.jpeg: sad
+surprised1.jpg: angry

@@ -8,6 +8,8 @@ import time
 import torch
 import logging
 import tensorflow as tf
+import glob
+import pandas as pd
 
 from PIL import Image
 from tensorflow.keras.models import Sequential, load_model
@@ -20,17 +22,21 @@ class EmotionDetector:
     def __init__(self, model_path):
         self.net = load_model(model_path)
 
-    def predict(self, img: Image.Image):
+    def predict(self, img: Image.Image, get_vector=False):
         gray_img = img.convert('L')
 
         resized_img = gray_img.resize((48,48))
         inp = np.array(resized_img).reshape((1,48,48,1))
         inp = tf.constant(inp)
 
-        pred = self.net(inp).numpy()
-        return np.argmax(pred)
+        pred = self.net(inp).numpy()[0]
 
+        if get_vector:
+            return pred[0]
+        else:
+            return np.argmax(pred)
 
+        
 def test_retina_emotion(args):
     cap = cv2.VideoCapture(0)
     emotion_detector = EmotionDetector(args.modelfile)
@@ -77,8 +83,45 @@ def test_retina_emotion(args):
         if key == ord("q"):
             break
 
+def inference(args):
+    emotion_detector = EmotionDetector(args.modelfile)
+    face_detector = RetinaDetector(device='cpu')
+    writer = pd.ExcelWriter('result.xlsx', engine='xlsxwriter')
+
+    imgs_path = os.path.join(args.root, "*")
+    os.makedirs("prediction", exist_ok=True)
+    counter = 0
+    for img_path in tqdm.tqdm(glob.glob(imgs_path)):
+        img = cv2.imread(img_path)
+        bboxes = face_detector.detect_from_image(img)
+        for idx, bbox in enumerate(bboxes):
+            if bbox[-1] >= 0.8:
+                counter += 1
+                face = Image.fromarray(img).crop(bbox[:4])
+                flag = emotion_detector.predict(face)
+                if flag==0:
+                    emotion='angry'
+                elif flag==1:
+                    emotion='disgusted'
+                elif flag==2:
+                    emotion='fearful'
+                elif flag==3:
+                    emotion='happy'
+                elif flag==4:
+                    emotion='sad'
+                elif flag==5:
+                    emotion='surprised'
+                elif flag==6:
+                    emotion=='neutral'
+
+                name = "./prediction/{}_{}.jpeg".format(flag,counter)
+                cv2.imwrite(name, img)
+
+
 def arg_parser():
     P = argparse.ArgumentParser(description='emotion')
+    P.add_argument('--job', type=str, default='camtest', help='do 1 of 2 jobs: camera test (camtest), processing images folder (inference)')
+    P.add_argument('--root', type=str, required=False, help='imgs folder path')
     P.add_argument('--modelfile', type=str, required=True, help='model file path')
     P.add_argument('--device', type=str, default='cpu', help='used device: cpu or cuda')
     args = P.parse_args()
@@ -87,4 +130,9 @@ def arg_parser():
 
 if __name__=="__main__":
     args = arg_parser()
-    test_retina_emotion(args)
+    if args.job == 'inference':
+        inference(args)
+    elif args.jop == 'camtest':
+        test_retina_emotion(args)
+    else:
+        raise Exception("Invalid Job.")
