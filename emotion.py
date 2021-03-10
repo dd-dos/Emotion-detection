@@ -10,6 +10,7 @@ import logging
 import tensorflow as tf
 import glob
 import pandas as pd
+import shutil
 
 from PIL import Image
 from tensorflow.keras.models import Sequential, load_model
@@ -17,6 +18,7 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
 from retinaface.retina_detector import RetinaDetector
+
 
 class EmotionDetector:
     def __init__(self, model_path):
@@ -89,7 +91,7 @@ def inference(args):
     writer = pd.ExcelWriter('result.xlsx', engine='xlsxwriter')
 
     imgs_path = os.path.join(args.root, "*")
-    os.remove("prediction")
+    shutil.rmtree("./prediction", ignore_errors=True)
     os.makedirs("prediction")
     counter = 0
     for img_path in tqdm.tqdm(glob.glob(imgs_path)):
