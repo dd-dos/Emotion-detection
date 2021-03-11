@@ -37,7 +37,7 @@ class SparseCategoricalFocalLoss(tf.keras.losses.Loss):
         else:
             probs = y_pred
         batch_size = tf.shape(y_true)[0]
-        indices = tf.stack([tf.range(batch_size), y_true], axis=1)
+        indices = tf.stack([tf.expand_dims(tf.range(batch_size), axis=0), y_true], axis=1)
         probs = tf.gather_nd(probs, indices)
         focal_modulation = (1 - probs) ** self.gamma
 
