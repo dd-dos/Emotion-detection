@@ -26,7 +26,7 @@ class SparseCategoricalFocalLoss(tf.keras.losses.Loss):
 
     def call(self, y_true, y_pred):
         y_pred = tf.convert_to_tensor(y_pred)
-        y_pred = tf.math.argmax(y_pred)
+        y_pred = tf.math.argmax(y_pred, output_type=tf.dtypes.float32)
         y_true = tf.dtypes.cast(y_true, dtype=tf.dtypes.int32)
 
         base_loss = tf.keras.backend.sparse_categorical_crossentropy(
