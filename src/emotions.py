@@ -26,9 +26,7 @@ class SparseCategoricalFocalLoss(tf.keras.losses.Loss):
 
     def call(self, y_true, y_pred):
         y_pred = tf.convert_to_tensor(y_pred)
-        y_pred = tf.dtypes.cast(tf.math.argmax(y_pred), dtype=tf.dtypes.float32)
         y_true = tf.dtypes.cast(y_true, dtype=tf.dtypes.int32)
-
         base_loss = tf.keras.backend.sparse_categorical_crossentropy(
             target=y_true, output=y_pred, from_logits=self.from_logits)
 
@@ -37,7 +35,7 @@ class SparseCategoricalFocalLoss(tf.keras.losses.Loss):
         else:
             probs = y_pred
         batch_size = tf.shape(y_true)[0]
-        indices = tf.stack([tf.expand_dims(tf.range(batch_size), axis=0), y_true], axis=1)
+        indices = tf.stack([tf.range(batch_size), y_true], axis=1)
         probs = tf.gather_nd(probs, indices)
         focal_modulation = (1 - probs) ** self.gamma
 
