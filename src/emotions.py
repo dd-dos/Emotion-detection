@@ -10,6 +10,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint
+import tensorflow_addons as tfa
 # from focal_loss import SparseCategoricalFocalLoss
 
 
@@ -127,7 +128,7 @@ if mode == "train":
     cp_path = os.path.join(cp, 'best.h5')
     os.makedirs(cp, exist_ok=True)
     checkpoint = ModelCheckpoint(cp_path, monitor='loss', verbose=1, save_best_only=True, mode='min', period=1)
-    model.compile(loss=SparseCategoricalFocalLoss(gamma=2),optimizer=Adam(lr=0.0001, decay=1e-6),metrics=['accuracy'])
+    model.compile(loss=tfa.losses.SigmoidFocalCrossEntropy(),optimizer=Adam(lr=0.0001, decay=1e-6),metrics=['accuracy'])
 
     model_info = model.fit_generator(
             train_generator,
