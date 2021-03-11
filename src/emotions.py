@@ -2,6 +2,7 @@ import numpy as np
 import argparse
 import matplotlib.pyplot as plt
 import cv2
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.layers import Conv2D
@@ -9,7 +10,39 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint
-from focal_loss import SparseCategoricalFocalLoss
+# from focal_loss import SparseCategoricalFocalLoss
+
+
+class SparseCategoricalFocalLoss(tf.keras.losses.Loss):
+    def __init__(self, gamma: float, from_logits: bool = False, **kwargs):
+        super().__init__(**kwargs)
+        self.gamma = gamma
+        self.from_logits = from_logits
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(gamma=self.gamma, from_logits=self.from_logits)
+        return config
+
+    def call(self, y_true, y_pred):
+        y_pred = tf.convert_to_tensor(y_pred)
+        y_pred = tf.math.argmax(y_pred, output_type=tf.dtypes.int32)
+        y_true = tf.dtypes.cast(y_true, dtype=tf.dtypes.int32)
+
+        base_loss = tf.keras.backend.sparse_categorical_crossentropy(
+            target=y_true, output=y_pred, from_logits=self.from_logits)
+
+        if self.from_logits:
+            probs = tf.nn.softmax(y_pred, axis=-1)
+        else:
+            probs = y_pred
+        batch_size = tf.shape(y_true)[0]
+        indices = tf.stack([tf.range(batch_size), y_true], axis=1)
+        probs = tf.gather_nd(probs, indices)
+        focal_modulation = (1 - probs) ** self.gamma
+
+        return focal_modulation * base_loss
+
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -97,6 +130,7 @@ if mode == "train":
     os.makedirs(cp, exist_ok=True)
     checkpoint = ModelCheckpoint(cp_path, monitor='loss', verbose=1, save_best_only=True, mode='min', period=1)
     model.compile(loss=SparseCategoricalFocalLoss(gamma=2),optimizer=Adam(lr=0.0001, decay=1e-6),metrics=['accuracy'])
+
     model_info = model.fit_generator(
             train_generator,
             steps_per_epoch=num_train // batch_size,
