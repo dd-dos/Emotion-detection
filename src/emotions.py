@@ -94,6 +94,7 @@ model.add(Dense(7, activation='softmax'))
 # If you want to train the same model or try other models, go for this
 if mode == "train":
     cp_path = os.path.join(cp, 'best.h5')
+    os.makedirs(cp, exist_ok=True)
     checkpoint = ModelCheckpoint(cp_path, monitor='loss', verbose=1, save_best_only=True, mode='min', period=1)
     model.compile(loss=SparseCategoricalFocalLoss(gamma=2),optimizer=Adam(lr=0.0001, decay=1e-6),metrics=['accuracy'])
     model_info = model.fit_generator(
