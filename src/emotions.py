@@ -13,36 +13,6 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 import tensorflow_addons as tfa
 # from focal_loss import SparseCategoricalFocalLoss
 
-
-class SparseCategoricalFocalLoss(tf.keras.losses.Loss):
-    def __init__(self, gamma: float, from_logits: bool = False, **kwargs):
-        super().__init__(**kwargs)
-        self.gamma = gamma
-        self.from_logits = from_logits
-
-    def get_config(self):
-        config = super().get_config()
-        config.update(gamma=self.gamma, from_logits=self.from_logits)
-        return config
-
-    def call(self, y_true, y_pred):
-        y_pred = tf.convert_to_tensor(y_pred)
-        y_true = tf.dtypes.cast(y_true, dtype=tf.dtypes.int32)
-        base_loss = tf.keras.backend.sparse_categorical_crossentropy(
-            target=y_true, output=y_pred, from_logits=self.from_logits)
-
-        if self.from_logits:
-            probs = tf.nn.softmax(y_pred, axis=-1)
-        else:
-            probs = y_pred
-        batch_size = tf.shape(y_true)[0]
-        indices = tf.stack([tf.range(batch_size), y_true], axis=1)
-        probs = tf.gather_nd(probs, indices)
-        focal_modulation = (1 - probs) ** self.gamma
-
-        return focal_modulation * base_loss
-
-
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
