@@ -69,7 +69,7 @@ def test_retina_emotion(args):
                 elif flag==5:
                     emotion='surprised'
                 elif flag==6:
-                    emotion=='neutral'
+                    emotion='neutral'
 
                 cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color=(0,255,0), thickness=2)
                 frame = cv2.putText(frame, 
@@ -136,7 +136,7 @@ if __name__=="__main__":
     args = arg_parser()
     if args.job == 'inference':
         inference(args)
-    elif args.jop == 'camtest':
+    elif args.job == 'camtest':
         test_retina_emotion(args)
     else:
         raise Exception("Invalid Job.")
