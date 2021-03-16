@@ -18,11 +18,12 @@ from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import MaxPooling2D
 from retinaface.retina_detector import RetinaDetector
+import tensorflow_addons as tfa
 
 
 class EmotionDetector:
     def __init__(self, model_path):
-        self.net = load_model(model_path)
+        self.net = load_model(model_path, custom_objects={'loss': tfa.losses.SigmoidFocalCrossEntropy()})
 
     def predict(self, img: Image.Image, get_vector=False):
         gray_img = img.convert('L')
