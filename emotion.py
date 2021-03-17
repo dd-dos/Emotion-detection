@@ -146,7 +146,7 @@ def inference(args):
         emotion_detector = EmotionDetectorDrake(args.modelfile)
         print("using drake emotion model")
 
-    face_detector = RetinaDetector(device='cpu')
+    face_detector = RetinaDetector(device=args.device)
     try:
         os.remove("test_result.txt")
     except:

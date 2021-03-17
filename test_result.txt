@@ -1,7 +1,7 @@
-sad: 0.0
-neutral: 0.0
-happy: 100.0
-disgusted: 0.0
-surprised: 0.0
-angry: 0.0
-fearful: 0.0
+sad: 17.282229965156795
+neutral: 0.2786624203821656
+happy: 95.56762939662568
+disgusted: 64.49704142011834
+surprised: 2.6079869600651997
+angry: 56.67324128862591
+fearful: 44.275420336269015
